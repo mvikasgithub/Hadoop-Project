@@ -224,6 +224,148 @@ finmenuquery6()
 }
 
 
+socmenuquery1()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		echo "Running Hive command with x = 4 and pension amount = 500 per person: "
+		hive -e "select count(*)*500 from db1.census where age+4 > 60 and age < 60;"	
+	elif [[ $retval == 2 ]]; then
+		echo "Pig Solution for this not available...."
+	elif [[ $retval == 3 ]]; then
+		echo "MapReduce Solution for this not available...."	
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+
+socmenuquery2()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		hive -e "select parents, Count(*) from db1.census where parents not like '%%Both parents present%%' group by parents;"	
+	elif [[ $retval == 2 ]]; then
+		pig -f soc2-pig-NoOfOrphansByParentsPresent
+	elif [[ $retval == 3 ]]; then
+		echo "MapReduce Solution for this not available...."	
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+
+socmenuquery3()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		hive -e "select count(*) from db1.census where gender like '%Female%' and (maritalstatus like '%Divorced%' or maritalstatus like '%Widowed%') and weeksworked > 0;"	
+	elif [[ $retval == 2 ]]; then
+		pig -f soc3-pig-EmployableFemaleWidowedOrDivorced
+	elif [[ $retval == 3 ]]; then
+		echo "MapReduce Solution for this not available...."	
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+
+planmenuquery1()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		echo "Running Hive command with X = 3: "
+		hive -e "select count(*) from db1.census where age+3 > 18 and age < 18;"	
+	elif [[ $retval == 2 ]]; then
+		echo "Running Pig command with X = 3: "
+		pig -f plan1-pig-VotersAddedInXYears
+	elif [[ $retval == 3 ]]; then
+		hadoop jar plan1-VotersInXYears.jar /user/hadoop/census.txt /user/hadoop/op
+		hadoop fs -cat /user/hadoop/op/p*
+
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+
+planmenuquery2()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		echo "Running Hive command with X = 4: "
+		hive -e "select count(*) from db1.census where age+4 > 60 and age < 60;"	
+	elif [[ $retval == 2 ]]; then
+		echo "Running Pig command with X = 4: "
+		pig -f plan2-pig-SeniorsAddedInXYears
+	elif [[ $retval == 3 ]]; then
+		hadoop jar plan2-SeniorCitizensInXYears.jar /user/hadoop/census.txt /user/hadoop/op
+		hadoop fs -cat /user/hadoop/op/p*
+
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+planmenuquery3()
+{
+	scriptchoicemenu
+	local retval=$?
+	echo $retval
+
+	echo "Processing...... please wait...."
+	if [[ $retval == 1 ]]; then	
+		hive -e "select weeksworked, citizenship, count(*) from db1.census group by weeksworked, citizenship;"	
+	elif [[ $retval == 2 ]]; then
+		pig -f plan3-pig-CitizenVsImmigrantOnEmployed
+	elif [[ $retval == 3 ]]; then
+		hadoop jar plan3-CitizenVsImmigrantOnEmployed.jar /user/hadoop/census.txt /user/hadoop/op
+		hadoop fs -cat /user/hadoop/op/p*
+
+	else
+		return
+	fi
+
+	echo "Press any key to continue...."
+	read waitforresulttobeseen
+}
+
+
 eduanaysismenu()
 {
 	echo "<=================EDUCATIONAL ANALYSIS=============>"	
@@ -258,7 +400,7 @@ eduanaysismenu()
 
 financialanalysismenu()
 {
-	echo "<=================EDUCATIONAL ANALYSIS=============>"	
+	echo "<=================FIANCIAL ANALYSIS=============>"	
 	echo " Query 1: Total Income of different types of Tax Payers"
 	echo " Query 2: Gender wise Total Income Generated"
 	echo " Query 3: Total Taxpayers"
@@ -296,6 +438,69 @@ financialanalysismenu()
 		done
 }
 
+socialanalysismenu()
+{
+	echo "<=================SOCIAL ANALYSIS=============>"	
+	echo " Query 1: Pension Amount to be added after x years"
+	echo " Query 2: No. of Orphans for each category based on Parents Present"
+	echo " Query 3: No. of Employable Female Citizens who are Widows or Divorced"
+	echo  "==========" 
+	echo  "Enter your option (Enter key to go to previous menu):"
+	read socmenuopt
+
+	clear
+	while [[ $socmenuopt != "" ]]
+		do
+	    		if [[ $socmenuopt == "" ]];then 
+				return ""
+				
+			else
+				case $socmenuopt in
+				1)	socmenuquery1;
+					;;
+				2)	socmenuquery2;
+					;;
+				3)	socmenuquery3;
+					;;
+				esac
+					socialanalysismenu;
+
+			fi
+		done
+}
+
+
+planninganalysismenu()
+{
+	echo "<=================PLANNING ANALYSIS=============>"	
+	echo " Query 1: No. of Voters to get added in next X years"
+	echo " Query 2: No. of Senior Citizen to get added in next X years"
+	echo " Query 3: Citizen vs. Immigrants Ratio for all Employed"
+	echo  "==========" 
+	echo  "Enter your option (Enter key to go to previous menu):"
+	read planmenuopt
+
+	clear
+	while [[ $planmenuopt != "" ]]
+		do
+	    		if [[ $planmenuopt == "" ]];then 
+				return ""
+				
+			else
+				case $planmenuopt in
+				1)	planmenuquery1;
+					;;
+				2)	planmenuquery2;
+					;;
+				3)	planmenuquery3;
+					;;
+				esac
+					planninganalysismenu;
+
+			fi
+		done
+}
+
 clear
 show_menu
 while [[ $mainmenuopt != "" ]]
@@ -313,11 +518,11 @@ while [[ $mainmenuopt != "" ]]
 				show_menu;
 				;;
 			3)	clear;
-				echo "<=================SOCIAL ANALYSIS=============>"
+				socialanalysismenu;
 				show_menu;
 				;;
 			4)	clear;
-				echo "<=================PLANNING ANALYSIS=============>"
+				planninganalysismenu;
 				show_menu;
 				;;
 			esac
